@@ -3,6 +3,7 @@
 #include <string.h>
 #include <limits.h>
 
+#include "debug.h" //included from HW8_P4
 #include "cma.h"
 
 #define ITEMNOTFOUND ((void *)-1)
@@ -22,6 +23,7 @@ static MNode class_AddToList(MNode list, MNode item) {
 }
 
 static MNode class_RemoveFromList(MNode list,MNode item) {
+	ENTER;
   MNode p,prev;
 
   prev = NULL;
@@ -34,23 +36,29 @@ static MNode class_RemoveFromList(MNode list,MNode item) {
       return list;
     }
     prev=p;
+	
   }
   //not in list..
   return ITEMNOTFOUND;
+	EXIT;
 }
 
 
 static void class_printList(MNode list) {
+	ENTER;
   if (!list)
     return;
   printf("Node %p, %d\n",list,list->size);
   class_printList(list->next);
+	EXIT;
 }
 
 int class_memory(void *mem, size_t size) {
+	ENTER;
   MNode item;
   if (class_membase ) {
     return FALSE;
+	
   }
 
   class_membase = mem;
@@ -62,18 +70,22 @@ int class_memory(void *mem, size_t size) {
   item->next = NULL;
   
   class_nouse = class_AddToList(class_nouse,item);
+	EXIT;
 }
 
 void *class_calloc(size_t nmemb, size_t size) {
+	ENTER;
   void *mem;
   class_counters.calloc++;
 
   mem = class_malloc(nmemb*size);
   memset(mem,0,nmemb*size);
   return mem;
+	EXIT;
 }
 
 static MNode class_findNoUse(size_t target) {
+	ENTER;
   size_t closeness=LONG_MAX;
   size_t c;
   MNode best=NULL;
@@ -87,9 +99,11 @@ static MNode class_findNoUse(size_t target) {
     }
   }
   return best;
+	EXIT;
 }
 
 MNode class_splitNode(MNode org,size_t size) {
+	ENTER;
 	MNode extra=NULL;
 	size_t orgsz = org->size;
 	
@@ -102,9 +116,11 @@ MNode class_splitNode(MNode org,size_t size) {
 	}
 	
 	return extra;
+	EXIT;
 }
 
 void *class_malloc(size_t size) {
+	ENTER;
   MNode newnode,extra;
 
   class_counters.malloc++;
@@ -126,15 +142,17 @@ void *class_malloc(size_t size) {
     class_counters.nomem++;
     return NULL;
   }
+	EXIT;
 }
 
 //attempt to find adjacent unused nodes and collapse them.
 static void class_garbage() {
-	//Not Implemented
+	
 
 }
 
 void class_free(void *ptr) {
+	ENTER;
   MNode cur=NULL;
   if (!ptr)
     return;
@@ -147,9 +165,11 @@ void class_free(void *ptr) {
   class_inuse = cur;
   class_nouse = class_AddToList(class_nouse,PTRTOMNODE(ptr));
   class_garbage();
+	EXIT;
 }
 
 void *class_realloc(void *ptr, size_t size) {
+	ENTER;
   void *mem;
   size_t oldsize;
 
@@ -163,9 +183,11 @@ void *class_realloc(void *ptr, size_t size) {
 
   class_free(ptr);
   return mem;
+	EXIT;
 }
 
 void class_stats() {
+	ENTER;
   printf("InUse\n");
   class_printList(class_inuse);
 
@@ -181,5 +203,7 @@ void class_stats() {
   DUMPC(gc);
   DUMPC(nomem);
 #undef DUMPC
+	EXIT;
 }
+
 
