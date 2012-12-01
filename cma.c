@@ -3,10 +3,11 @@
 #include <string.h>
 #include <limits.h>
 
-#include "debug.h" //included from HW8_P4
+#include "debug.h" //incuded from HW8_P4
 #include "cma.h"
 
 #define ITEMNOTFOUND ((void *)-1)
+#define NXT(e) ((void *)e+e->size+sizeof(struct MemNode))
 
 static void *class_membase=NULL;
 static void *class_limit=NULL;
@@ -147,8 +148,20 @@ void *class_malloc(size_t size) {
 
 //attempt to find adjacent unused nodes and collapse them.
 static void class_garbage() {
-	
-
+	ENTER;
+	 MNode head, here, there;
+         here=class_nouse;
+         int count=0;
+ 
+         while(here!=NULL) {
+         if(NXT(here)){
+         there=here;
+         here->next=there->next;
+         here->size=(here->size+there->size+there->head);
+         count++;
+         printf("here is count:%d", count);
+ }}
+EXIT;
 }
 
 void class_free(void *ptr) {
