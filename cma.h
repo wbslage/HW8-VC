@@ -3,7 +3,7 @@
 typedef struct MemNode *MNode;
 
 struct MemNode {
-	MNode next;
+	MNode next, head;
 	int size;
 };
 

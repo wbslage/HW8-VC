@@ -19,8 +19,9 @@ static struct {
 } class_counters={0,0,0,0,0,0};
 
 static MNode class_AddToList(MNode list, MNode item) {
+ENTER;
   item->next = list;
-  return item;
+  RETURN (item)	;
 }
 
 static MNode class_RemoveFromList(MNode list,MNode item) {
@@ -34,22 +35,22 @@ static MNode class_RemoveFromList(MNode list,MNode item) {
 	list=p->next;
       else
 	prev->next = p->next;
-      return list;
+      RETURN (list);
     }
     prev=p;
 	
   }
   //not in list..
-  return ITEMNOTFOUND;
-	EXIT;
+ RETURN ( ITEMNOTFOUND);
+	
 }
 
 
 static void class_printList(MNode list) {
 	ENTER;
   if (!list)
-    return;
-  printf("Node %p, %d\n",list,list->size);
+    EXIT;
+  printf("Node %p, %ud\n",list,list->size);
   class_printList(list->next);
 	EXIT;
 }
@@ -58,7 +59,7 @@ int class_memory(void *mem, size_t size) {
 	ENTER;
   MNode item;
   if (class_membase ) {
-    return FALSE;
+    RETURN (FALSE);
 	
   }
 
@@ -66,7 +67,7 @@ int class_memory(void *mem, size_t size) {
   class_limit = mem+size;
   
   //setup initial list item
-  item = (MNode)mem;
+ item = (MNode)mem;
   item->size=size-sizeof(struct MemNode);
   item->next = NULL;
   
@@ -81,8 +82,8 @@ void *class_calloc(size_t nmemb, size_t size) {
 
   mem = class_malloc(nmemb*size);
   memset(mem,0,nmemb*size);
-  return mem;
-	EXIT;
+  RETURN (mem);
+	
 }
 
 static MNode class_findNoUse(size_t target) {
@@ -91,16 +92,17 @@ static MNode class_findNoUse(size_t target) {
   size_t c;
   MNode best=NULL;
   MNode p;
-
+DEBUG("Searching for a block of size: %ud",target);
   for (p=class_nouse;p!=NULL;p=p->next) {
     c = p->size - target;
     if (c >= 0 && c<closeness) {
       best = p;
       closeness=c;
+DEBUG("Best is now: %x size=%ud",best,p->size);
     }
   }
-  return best;
-	EXIT;
+  RETURN (best);
+	
 }
 
 MNode class_splitNode(MNode org,size_t size) {
@@ -110,14 +112,16 @@ MNode class_splitNode(MNode org,size_t size) {
 	
 	//we need room for a new header
 	if ( (orgsz-size-sizeof(struct MemNode)) > 0 ) {
+DEBUG("Node split: %ud => %ud,%ud",org->size,size,orgsz-sizeof(struct MemNode)-size);
 		org->size = size;
 		extra = (MNode)((void*)org+size+sizeof(struct MemNode));
 		extra->next = 0;
 		extra->size = orgsz-sizeof(struct MemNode)-size;
 	}
+	else
++		DEBUG("Node does not have enough size to split:%ud %ud",org->size,size);
+	RETURN (extra);
 	
-	return extra;
-	EXIT;
 }
 
 void *class_malloc(size_t size) {
@@ -137,11 +141,11 @@ void *class_malloc(size_t size) {
     
     newnode->next = NULL;
     class_inuse = class_AddToList(class_inuse,newnode);
-    return (void *)newnode+sizeof(struct MemNode);
+    RETURN (void *)newnode+sizeof(struct MemNode);
   }
   else {
     class_counters.nomem++;
-    return NULL;
+    RETURN (NULL);
   }
 	EXIT;
 }
@@ -154,7 +158,7 @@ static void class_garbage() {
          int count=0;
  
          while(here!=NULL) {
-         if(NXT(here)){
+         if(NXT(here)==there){
          there=here;
          here->next=there->next;
          here->size=(here->size+there->size+there->head);
@@ -167,12 +171,14 @@ EXIT;
 void class_free(void *ptr) {
 	ENTER;
   MNode cur=NULL;
-  if (!ptr)
-    return;
+  if (!ptr){
+	EXIT;
+    return;}
 
   class_counters.free++;
   cur=class_RemoveFromList(class_inuse,PTRTOMNODE(ptr));
   if (cur==ITEMNOTFOUND) {//not our pointer
+    EXIT;
     return;
   }
   class_inuse = cur;
@@ -189,14 +195,14 @@ void *class_realloc(void *ptr, size_t size) {
   class_counters.realloc++;
   mem=class_malloc(size);
   if (!mem)
-    return NULL;
+    RETURN (NULL);
 
   oldsize=PTRTOMNODE(ptr)->size;
   memcpy(mem,ptr,oldsize);
 
   class_free(ptr);
-  return mem;
-	EXIT;
+  RETURN (mem);
+
 }
 
 void class_stats() {

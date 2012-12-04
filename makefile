@@ -1,4 +1,4 @@
-CC=gcc
+CC=gcc -g
 TARGETS=ma ma2 ma.shared ma2.shared
 CFLAGS=-O2
 LDFLAGS=-L. -lcma
