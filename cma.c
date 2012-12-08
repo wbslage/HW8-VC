@@ -21,13 +21,13 @@ static struct {
 
 static MNode class_AddToList(MNode list, MNode item) {
 ENTER;
-<<<<<<< HEAD
+
   item->next = list;
   RETURN (item)	;
-=======
+
 item->next = list;
   RETURN (item);
->>>>>>> d5dbfb3e452563de344b07b775e3adde44a471de
+
 }
 
 static MNode class_RemoveFromList(MNode list,MNode item) {
@@ -47,27 +47,25 @@ static MNode class_RemoveFromList(MNode list,MNode item) {
 	
   }
   //not in list..
-<<<<<<< HEAD
+
  RETURN ( ITEMNOTFOUND);
 	
-=======
-  RETURN (ITEMNOTFOUND);
 
->>>>>>> d5dbfb3e452563de344b07b775e3adde44a471de
+
 }
 
 
 static void class_printList(MNode list) {
 	ENTER;
-<<<<<<< HEAD
+
   if (!list)
     EXIT;
   printf("Node %p, %ud\n",list,list->size);
-=======
+
   if (!list){ EXIT
     return;}
   printf("Node %p, %d\n",list,list->size);
->>>>>>> d5dbfb3e452563de344b07b775e3adde44a471de
+
   class_printList(list->next);
 	EXIT;
 }
@@ -136,14 +134,10 @@ DEBUG("Node split: %ud => %ud,%ud",org->size,size,orgsz-sizeof(struct MemNode)-s
 		extra->size = orgsz-sizeof(struct MemNode)-size;
 	}
 	else
-+		DEBUG("Node does not have enough size to split:%ud %ud",org->size,size);
+		DEBUG("Node does not have enough size to split:%ud %ud",org->size,size);
 	RETURN (extra);
 	
-<<<<<<< HEAD
-=======
-	RETURN (extra);
-	
->>>>>>> d5dbfb3e452563de344b07b775e3adde44a471de
+
 }
 
 void *class_malloc(size_t size) {
@@ -193,30 +187,30 @@ EXIT;
 void class_free(void *ptr) {
 	ENTER;
   MNode cur=NULL;
-<<<<<<< HEAD
+
   if (!ptr){
 	EXIT;
-=======
+
   if (!ptr){EXIT
->>>>>>> d5dbfb3e452563de344b07b775e3adde44a471de
+
     return;}
 
   class_counters.free++;
   cur=class_RemoveFromList(class_inuse,PTRTOMNODE(ptr));
   if (cur==ITEMNOTFOUND) {//not our pointer
-<<<<<<< HEAD
+
     EXIT;
     return;
-=======
+
     EXIT; return;
->>>>>>> d5dbfb3e452563de344b07b775e3adde44a471de
+
   }
   class_inuse = cur;
   class_nouse = class_AddToList(class_nouse,PTRTOMNODE(ptr));
   class_garbage();
 	EXIT;
 }
-
+}
 void *class_realloc(void *ptr, size_t size) {
 	ENTER;
   void *mem;
@@ -232,11 +226,7 @@ void *class_realloc(void *ptr, size_t size) {
 
   class_free(ptr);
   RETURN (mem);
-<<<<<<< HEAD
 
-=======
-	
->>>>>>> d5dbfb3e452563de344b07b775e3adde44a471de
 }
 
 void class_stats() {
